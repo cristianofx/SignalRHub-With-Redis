@@ -8,13 +8,13 @@ using System.Net;
 
 namespace SignalRHub.SignalR
 {
-    public class HubSubscriptionInMemory
+    public class HubSubscriptionInRedis
     {
         private AppSettings _appSettings;
         ConnectionMultiplexer redisDb;
         IDatabase subscriptionDb;
 
-        public HubSubscriptionInMemory(AppSettings appSettings)
+        public HubSubscriptionInRedis(AppSettings appSettings)
         {
             _appSettings = appSettings;
             var options = ConfigurationOptions.Parse($"{_appSettings.Redis.Host}:{_appSettings.Redis.Port},password={_appSettings.Redis.Password},defaultDatabase={Constants.RedisSignalRSubscriptionDatabase}");

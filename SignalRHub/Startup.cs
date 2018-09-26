@@ -68,7 +68,8 @@ namespace SignalRHub
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddSingleton<ISignalRMainHub, SignalRMainHub>();
-            services.AddSingleton<HubSubscriptionInMemory>();
+            services.AddSingleton<HubSubscriptionInRedis>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -11,21 +11,20 @@ namespace SignalRHub.SignalR
 {
     public class SignalRMainHub : Hub, ISignalRMainHub
     {
-        private HubSubscriptionInMemory _hubInfoInMemory;
+        private HubSubscriptionInRedis _hubInfoInRedis;
         protected IHubContext<SignalRMainHub> _context;
 
-        public SignalRMainHub(IHubContext<SignalRMainHub> context, HubSubscriptionInMemory hubInfoInMemory)
+        public SignalRMainHub(IHubContext<SignalRMainHub> context, HubSubscriptionInRedis hubInfoInRedis)
         {
             _context = context;
-            _hubInfoInMemory = hubInfoInMemory;
+            _hubInfoInRedis = hubInfoInRedis;
         }
 
         public IEnumerable<string> GetAllConnectionIds()
         {
-            return _hubInfoInMemory.GetAllConnections().Select(x => $"{x.Process} : {x.ConnectionId}");
+            return _hubInfoInRedis.GetAllConnections().Select(x => $"{x.Process} : {x.ConnectionId}");
         }
 
-        //you're going to invoke this method from the client app
         public void EchoAll(string message)
         {
             _context.Clients.All.SendAsync("SendAll", message);
@@ -33,15 +32,13 @@ namespace SignalRHub.SignalR
 
         public void EchoClient(string message)
         {
-            //you're going to configure your client app to listen for this
             _context.Clients.Client("connectionId").SendAsync(message);
         }
 
         public void NotifyAllSubscribed(string process, object message, string userId = null)
         {
-            var subscribed = userId == null ? _hubInfoInMemory.GetAllUsersByProcess(process) : _hubInfoInMemory.GetAllUsersByProcess(process).Where(f => f.UserId == userId);
+            var subscribed = userId == null ? _hubInfoInRedis.GetAllUsersByProcess(process) : _hubInfoInRedis.GetAllUsersByProcess(process).Where(f => f.UserId == userId);
 
-            //you're going to configure your client app to listen for this
             foreach (var client in subscribed)
             {
                 _context.Clients.Client(client.ConnectionId).SendAsync(process, JsonConvert.SerializeObject(message));
@@ -52,7 +49,7 @@ namespace SignalRHub.SignalR
         {
             await Task.Run(() =>
             {
-                _hubInfoInMemory.Subscribe(process, userId, Context.ConnectionId);
+                _hubInfoInRedis.Subscribe(process, userId, Context.ConnectionId);
             });
         }
 
@@ -60,7 +57,7 @@ namespace SignalRHub.SignalR
         {
             await Task.Run(() =>
             {
-                _hubInfoInMemory.RemoveSubscription(process, Context.ConnectionId);
+                _hubInfoInRedis.RemoveSubscription(process, Context.ConnectionId);
             });
         }
 
@@ -72,7 +69,7 @@ namespace SignalRHub.SignalR
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            _hubInfoInMemory.RemoveAllSubscriptionFromClient(Context.ConnectionId);
+            _hubInfoInRedis.RemoveAllSubscriptionFromClient(Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }
     }
