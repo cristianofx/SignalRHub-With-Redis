@@ -1,1 +1,1 @@
-# SignalRHub
+# SignalR Hub With Redis Sample
