@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using SignalRHub.Contracts;
-using SignalRHub.SignalR;
+using SignalRHub.Models.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +28,11 @@ namespace SignalRHub.SignalR
         public void EchoAll(string message)
         {
             _context.Clients.All.SendAsync("SendAll", message);
+        }
+
+        public async Task SendMessage(RoomMessage message)
+        {
+            await _context.Clients.All.SendAsync("SendAll", message);
         }
 
         public void EchoClient(string message)

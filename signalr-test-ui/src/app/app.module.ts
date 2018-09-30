@@ -9,6 +9,7 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule } from '@angular/material';
 import { ChatRoom1Component } from './chat-room1/chat-room1.component';
 import { ChatRoom2Component } from './chat-room2/chat-room2.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { ChatRoom2Component } from './chat-room2/chat-room2.component';
     MatSidenavModule,
     MatIconModule,
     MatListModule,
+    FormsModule,
     RouterModule.forRoot([
       {
         path: '', component: MyNavComponent, children: [

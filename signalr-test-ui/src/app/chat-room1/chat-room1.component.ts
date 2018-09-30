@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import { RoomMessage } from '../room-message';
 
 @Component({
   selector: 'app-chat-room1',
@@ -9,15 +12,19 @@ import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
 export class ChatRoom1Component implements OnInit {
 
   public hubConnection: HubConnection;
+  messages = [];
+  roomMessage: RoomMessage;
 
-  constructor() { }
+  constructor() {
+    this.roomMessage = new RoomMessage('', 'Room1');  
+   }
 
   ngOnInit() {
-    //this.signalRConnection();
+    this.signalRConnection();
   }
 
   ngOnDestroy() {
-    //this.closeSignalRConnection();
+    this.closeSignalRConnection();
   }
 
   private closeSignalRConnection() {
@@ -34,10 +41,11 @@ export class ChatRoom1Component implements OnInit {
       console.log("creating hub connection");
       // as per setup in the startup.cs
       this.hubConnection = builder.withUrl('http://localhost:5000/hubs/echo').build();
-      //this.hubConnection = builder.withUrl('http://localhost:5000/hubs/echo').build();
       // message coming from the server
       this.hubConnection.on("SendAll", (message) => {
-        //message logic here
+        console.log(message);
+        if(message.room == this.roomMessage.room)
+          this.appendMessage(message.message);
       });
     }
     this.hubConnection.onclose(() => {
@@ -47,6 +55,14 @@ export class ChatRoom1Component implements OnInit {
     this.hubConnection.start().catch(() => {
       console.log("Connection to host failed");
     });
+  }
+
+  appendMessage(message: string) {
+    this.messages.push(message);
+  }
+
+  sendRoomMessage() {  
+    this.hubConnection.invoke('SendMessage', this.roomMessage);  
   }
 
 }
